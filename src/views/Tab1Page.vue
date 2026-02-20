@@ -13,6 +13,7 @@
       </ion-header>
 
       <ExploreContainer name="Tab 1 page" />
+      <ExploreContainer name="Tab 1 page" />
 
       <ion-button @click="openActionSheet">Abrir Action Sheet</ion-button>
 
@@ -42,6 +43,9 @@
         <h2>Precio Bitcoin</h2>
         <p>USD: {{ userStore.bitcoinPrice.bpi.USD.rate }}</p>
       </div>
+    </ion-content>
+  </ion-page>
+</template>
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonList, IonItem, IonLabel, actionSheetController } from '@ionic/vue';
@@ -91,4 +95,5 @@ const fetchUsers = () => {
 const fetchBitcoinPrice = () => {
   userStore.fetchBitcoinPrice();
 };
+</script>
 </script>
