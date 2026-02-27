@@ -11,7 +11,7 @@ export const useUserStore = defineStore('user', {
     bitcoinPrice: null as any,
   }),
   actions: {
-    login(user: { name: string; email: string; password: string }) {
+    login(user: { name: string; email: string | null; password: string }) {
       this.name = user.name;
       this.email = user.email;
       this.password = user.password;

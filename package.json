@@ -11,7 +11,8 @@
     "test:unit": "vitest",
     "lint": "eslint .",
     "ionic:build": "npm run build",
-    "ionic:serve": "npm run dev -- --open"
+    "ionic:serve": "npm run dev -- --open",
+    "webnative:demo": "node ./scripts/webnative-demo.js"
   },
   "dependencies": {
     "@capacitor/android": "8.0.1",
@@ -26,7 +27,8 @@
     "ionicons": "^7.0.0",
     "pinia": "^3.0.4",
     "vue": "^3.3.0",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.2.0",
+    "webnative": "^0.36.3"
   },
   "devDependencies": {
     "@capacitor/cli": "8.0.1",

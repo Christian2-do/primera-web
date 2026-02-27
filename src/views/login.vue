@@ -26,7 +26,10 @@
                 Iniciar Sesión
               </ion-button>
             </form>
+            <p style="text-align:center; margin-top:10px;"><router-link to="/register">¿No tienes cuenta? Regístrate</router-link></p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+            <!-- helpful debug information for webnative -->
+            <p class="webnative-info">Webnative SDK v{{ webnativeVersion }} – supported: {{ webnativeSupported }}</p>
           </ion-card-content>
         </ion-card>
       </div>
@@ -37,22 +40,43 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import { loginApi, saveToken } from '@/services/auth';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/vue';
 
+// webnative SDK for demonstration
+import * as webnative from 'webnative';
+
 const router = useRouter();
+const userStore = useUserStore();
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
+const loading = ref(false);
 
-const isFormValid = computed(() => username.value && password.value);
+// webnative info
+const webnativeVersion = ref(webnative.VERSION);
+const webnativeSupported = ref(false);
+webnative.isSupported().then(v => { webnativeSupported.value = v; }).catch(() => {});
 
-const login = () => {
-  // Simulación de login (reemplaza con tu lógica real, como una API)
-  if (username.value === 'admin' && password.value === '1234') {
-    localStorage.setItem('authToken', 'fake-token');
-    router.push('/tabs/tab1');
-  } else {
-    errorMessage.value = 'Usuario o contraseña incorrectos';
+const isFormValid = computed(() => !!username.value && !!password.value && !loading.value);
+
+const login = async () => {
+  errorMessage.value = '';
+  loading.value = true;
+  try {
+    const res = await loginApi(username.value, password.value);
+    if (res && res.token) {
+      saveToken(res.token);
+      userStore.login({ name: res.user?.name || username.value, email: res.user?.email || null, password: '' });
+      router.push('/tabs/tab1');
+    } else {
+      errorMessage.value = 'Respuesta inválida del servidor';
+    }
+  } catch (err: any) {
+    errorMessage.value = err?.message || 'Error al iniciar sesión';
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -103,4 +127,10 @@ ion-card {
   margin-top: 15px;
   font-weight: bold;
 }
-</style>
+
+.webnative-info {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #ffffffaa;
+}</style>
