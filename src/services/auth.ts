@@ -10,12 +10,14 @@ const getBase = () => import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
 export async function loginApi(username: string, password: string): Promise<AuthResponse> {
   const base = getBase();
+  console.log('loginApi called with', { username, password });
   const res = await fetch(`${base}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
   const text = await res.text();
+  console.log('loginApi response status', res.status, 'body', text);
   try {
     const json = JSON.parse(text || '{}');
     if (!res.ok) throw new Error(json.message || text || 'Login failed');
@@ -28,12 +30,14 @@ export async function loginApi(username: string, password: string): Promise<Auth
 
 export async function registerApi(name: string, email: string, password: string): Promise<AuthResponse> {
   const base = getBase();
+  console.log('registerApi called with', { name, email, password });
   const res = await fetch(`${base}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ username: name, name, email, password }),
   });
   const text = await res.text();
+  console.log('registerApi response status', res.status, 'body', text);
   try {
     const json = JSON.parse(text || '{}');
     if (!res.ok) throw new Error(json.message || text || 'Register failed');

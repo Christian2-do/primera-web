@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue'
+import TabsPage from '../views/TabsPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -9,11 +9,11 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    component: () => import('@/views/login.vue')
+    component: () => import('@/views/LoginPage.vue')
   },
   {
     path: '/register',
-    component: () => import('@/views/register.vue')
+    component: () => import('@/views/RegisterPage.vue')
   },
   {
     path: '/tabs/',
@@ -48,6 +48,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  console.log('Navigating to', to.fullPath, 'from', from.fullPath);
   if (to.meta.requiresAuth && !localStorage.getItem('authToken')) {
     next('/login');
   } else {

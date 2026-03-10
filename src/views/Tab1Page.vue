@@ -96,4 +96,3 @@ const fetchBitcoinPrice = () => {
   userStore.fetchBitcoinPrice();
 };
 </script>
-</script>

@@ -27,9 +27,10 @@
               </ion-button>
             </form>
             <p style="text-align:center; margin-top:10px;"><router-link to="/register">¿No tienes cuenta? Regístrate</router-link></p>
+            <p style="text-align:center; margin-top:10px;">
+              <button @click="goToRegister" style="background:none;border:none;color:#667eea;cursor:pointer;">Regístrate</button>
+            </p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-            <!-- helpful debug information for webnative -->
-            <p class="webnative-info">Webnative SDK v{{ webnativeVersion }} – supported: {{ webnativeSupported }}</p>
           </ion-card-content>
         </ion-card>
       </div>
@@ -44,9 +45,6 @@ import { useUserStore } from '@/stores/user';
 import { loginApi, saveToken } from '@/services/auth';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/vue';
 
-// webnative SDK for demonstration
-import * as webnative from 'webnative';
-
 const router = useRouter();
 const userStore = useUserStore();
 const username = ref('');
@@ -54,21 +52,18 @@ const password = ref('');
 const errorMessage = ref('');
 const loading = ref(false);
 
-// webnative info
-const webnativeVersion = ref(webnative.VERSION);
-const webnativeSupported = ref(false);
-webnative.isSupported().then(v => { webnativeSupported.value = v; }).catch(() => {});
-
 const isFormValid = computed(() => !!username.value && !!password.value && !loading.value);
 
 const login = async () => {
   errorMessage.value = '';
   loading.value = true;
   try {
+    console.log('Attempting login with', { username: username.value });
     const res = await loginApi(username.value, password.value);
     if (res && res.token) {
       saveToken(res.token);
       userStore.login({ name: res.user?.name || username.value, email: res.user?.email || null, password: '' });
+      console.log('Login successful, redirecting to /tabs/tab1');
       router.push('/tabs/tab1');
     } else {
       errorMessage.value = 'Respuesta inválida del servidor';
@@ -79,58 +74,20 @@ const login = async () => {
     loading.value = false;
   }
 };
+
+const goToRegister = () => {
+  console.log('Navigating to register');
+  router.push('/register');
+};
 </script>
 
 <style scoped>
-.login-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.login-container {
-  width: 100%;
-  max-width: 400px;
-}
-
-ion-card {
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.label-spacing {
-  letter-spacing: 2px;
-}
-
-.input-spacing {
-  padding-top: 10px;
-}
-
-.login-button {
-  margin-top: 20px;
-  --background: #667eea;
-  --background-hover: #5a6fd8;
-  --background-activated: #4e63c4;
-}
-
-.error-message {
-  color: #ff6b6b;
-  text-align: center;
-  margin-top: 15px;
-  font-weight: bold;
-}
-
-.webnative-info {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #ffffffaa;
-}</style>
+.login-content { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.login-container { width: 100%; max-width: 400px; }
+ion-card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.login-form { display:flex; flex-direction:column; gap:25px; }
+.label-spacing { letter-spacing: 2px; }
+.input-spacing { padding-top: 10px; }
+.login-button { margin-top: 20px; --background: #667eea; --background-hover: #5a6fd8; --background-activated: #4e63c4; }
+.error-message { color: #ff6b6b; text-align: center; margin-top: 15px; font-weight: bold; }
+</style>
