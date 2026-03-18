@@ -26,10 +26,6 @@
                 <ion-label position="floating" class="label-spacing">Contraseña</ion-label>
                 <ion-input v-model="password" type="password" required class="input-spacing"></ion-input>
               </ion-item>
-              <ion-item>
-                <ion-label position="floating" class="label-spacing">Confirmar Contraseña</ion-label>
-                <ion-input v-model="confirmPassword" type="password" required class="input-spacing"></ion-input>
-              </ion-item>
               <ion-button expand="full" type="submit" :disabled="!isFormValid" class="login-button">
                 Registrarse
               </ion-button>
@@ -40,11 +36,16 @@
             <p v-if="photo" style="margin-top:10px;">
               <img :src="photo" alt="Foto capturada" style="width:100%;"/>
             </p>
+            <div v-if="showPreview" style="margin-top:10px;">
+              <video ref="videoRef" autoplay playsinline style="width:100%; border:1px solid #ccc;"></video>
+            </div>
             <p v-if="location" style="margin-top:5px;">
               Latitud: {{ location.latitude }}, Longitud: {{ location.longitude }}
             </p>
             <button @click="getLocation" style="margin-top:10px;">Obtener ubicación</button>
-            <button @click="capturePhoto" style="margin-top:10px;">Tomar foto</button>
+            <button @click="startPreview" style="margin-top:10px;">Ver cámara</button>
+            <button @click="capturePhoto" style="margin-top:10px;" :disabled="!showPreview">Tomar foto</button>
+            <button @click="stopPreview" style="margin-top:10px;" :disabled="!showPreview">Detener vista previa</button>
           </ion-card-content>
         </ion-card>
       </div>
@@ -59,17 +60,20 @@ import { useRegisterForm } from '@/composables/useRegisterForm';
 
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/vue';
 
-const {
-  name,
-  email,
-  password,
-  confirmPassword,
-  errorMessage,
-  loading,
-  isFormValid,
-  register,
-} = useRegisterForm();
+  const {
+    name,
+    email,
+    password,
+    errorMessage,
+    loading,
+    isFormValid,
+    register,
+  } = useRegisterForm();
 const location = ref<any | null>(null);
+// Camera preview state
+const showPreview = ref(false);
+const previewStream = ref<MediaStream | null>(null);
+const videoRef = ref<HTMLVideoElement | null>(null);
 // Allow undefined to satisfy type inference from takePhoto
 const photo = ref<string | null | undefined>(null);
 
@@ -94,12 +98,55 @@ const getLocation = async () => {
   }
 };
 
+const startPreview = async () => {
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      previewStream.value = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.value) {
+        videoRef.value.srcObject = previewStream.value;
+        await videoRef.value.play();
+      }
+      showPreview.value = true;
+    }
+  } catch (err) {
+    console.error('Error starting preview', err);
+  }
+};
+
+const stopPreview = () => {
+  if (previewStream.value) {
+    previewStream.value.getTracks().forEach((t) => t.stop());
+    previewStream.value = null;
+  }
+  showPreview.value = false;
+};
+
 const capturePhoto = async () => {
   try {
     const { takePhoto } = await import('../services/hardware');
     photo.value = await takePhoto();
   } catch (e) {
     console.error('Error al capturar foto', e);
+    // Fallback: use browser camera via getUserMedia and canvas
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        await video.play();
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          photo.value = canvas.toDataURL('image/png');
+        }
+        stream.getTracks().forEach((t) => t.stop());
+      } catch (err) {
+        console.error('Fallback capture failed', err);
+      }
+    }
   }
 };
 </script>

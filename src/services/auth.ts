@@ -6,7 +6,11 @@ export interface AuthResponse {
   };
 }
 
-const getBase = () => import.meta.env.VITE_API_BASE || 'http://localhost:3000';
+const getBase = () => {
+  const base = import.meta.env.VITE_API_BASE || '';
+  console.log('API base URL:', base);
+  return base;
+};
 
 export async function loginApi(username: string, password: string): Promise<AuthResponse> {
   const base = getBase();
@@ -34,7 +38,7 @@ export async function registerApi(name: string, email: string, password: string)
   const res = await fetch(`${base}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: name, name, email, password }),
+    body: JSON.stringify({ username: name, email, password }),
   });
   const text = await res.text();
   console.log('registerApi response status', res.status, 'body', text);

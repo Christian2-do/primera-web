@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "ionic:build": "npm run build",
     "ionic:serve": "npm run dev -- --open",
+    "dev:chrome": "set BROWSER=chrome && npm run dev",
     "webnative:demo": "node ./scripts/webnative-demo.js"
   },
   "dependencies": {

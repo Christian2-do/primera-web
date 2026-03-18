@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { registerApi, saveToken } from '@/services/auth';
 import { useRouter } from 'vue-router';
@@ -17,8 +17,17 @@ export function useRegisterForm() {
     const n = name.value.trim();
     const e = email.value.trim();
     const p = password.value.trim();
-    const cp = confirmPassword.value.trim();
-    return !!n && !!e && !!p && !!cp && p === cp && !loading.value;
+    return !!n && !!e && !!p && !loading.value;
+  });
+
+  watchEffect(() => {
+    console.log('register form state', {
+      name: name.value,
+      email: email.value,
+      passwordLength: (password.value || '').toString().length,
+      isFormValid: isFormValid.value,
+      loading: loading.value,
+    });
   });
 
   const register = async () => {
@@ -29,7 +38,11 @@ export function useRegisterForm() {
       if (res && res.token) {
         saveToken(res.token);
         userStore.login({ name: res.user?.name || name.value, email: res.user?.email || email.value, password: '' });
-        router.push('/tabs/tab1');
+        // Show success message before redirect
+        errorMessage.value = 'Registro exitoso';
+        setTimeout(() => {
+          router.push('/tabs/tab1');
+        }, 1500);
       } else {
         throw new Error('No token received from registerApi');
       }
@@ -45,7 +58,7 @@ export function useRegisterForm() {
     name,
     email,
     password,
-    confirmPassword,
+    // confirmPassword removed
     errorMessage,
     loading,
     isFormValid,
