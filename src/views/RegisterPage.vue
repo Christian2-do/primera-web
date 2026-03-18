@@ -26,13 +26,17 @@
                 <ion-label position="floating" class="label-spacing">Contraseña</ion-label>
                 <ion-input v-model="password" type="password" required class="input-spacing"></ion-input>
               </ion-item>
+              <ion-item>
+                <ion-label position="floating" class="label-spacing">Confirmar Contraseña</ion-label>
+                <ion-input v-model="confirmPassword" type="password" required class="input-spacing"></ion-input>
+              </ion-item>
               <ion-button expand="full" type="submit" :disabled="!isFormValid" class="login-button">
                 Registrarse
               </ion-button>
             </form>
             <p style="text-align:center; margin-top:10px;"><router-link to="/login">¿Ya tienes cuenta? Inicia sesión</router-link></p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-            <p v-if="!isFormValid" class="error-message">Completa todos los campos para habilitar el botón</p>
+            <p v-if="!isFormValid" class="error-message">Completa todos los campos y verifica que las contraseñas coincidan</p>
             <p v-if="photo" style="margin-top:10px;">
               <img :src="photo" alt="Foto capturada" style="width:100%;"/>
             </p>
@@ -51,19 +55,20 @@
 <script setup lang="ts">
 console.log('RegisterPage component loaded');
 import { ref, computed, watchEffect } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import { registerApi, saveToken } from '@/services/auth';
+import { useRegisterForm } from '@/composables/useRegisterForm';
 
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/vue';
 
-const router = useRouter();
-const userStore = useUserStore();
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const errorMessage = ref('');
-const loading = ref(false);
+const {
+  name,
+  email,
+  password,
+  confirmPassword,
+  errorMessage,
+  loading,
+  isFormValid,
+  register,
+} = useRegisterForm();
 const location = ref<any | null>(null);
 // Allow undefined to satisfy type inference from takePhoto
 const photo = ref<string | null | undefined>(null);
@@ -78,42 +83,7 @@ watchEffect(() => {
   });
 });
 
-const isFormValid = computed(() => {
-  const n = (name.value || '').toString().trim();
-  const e = (email.value || '').toString().trim();
-  const p = (password.value || '').toString().trim();
-  return !!n && !!e && !!p && !loading.value;
-});
-
-const register = async () => {
-  errorMessage.value = '';
-  loading.value = true;
-  try {
-    console.log('Attempting register with', { name: name.value, email: email.value });
-    const res = await registerApi(name.value, email.value, password.value);
-    if (res && res.token) {
-      saveToken(res.token);
-      userStore.login({ name: res.user?.name || name.value, email: res.user?.email || email.value, password: '' });
-      console.log('Register successful, redirecting to /tabs/tab1');
-      router.push('/tabs/tab1');
-      return;
-    }
-    console.warn('No token received from registerApi, continuing with fallback.');
-    saveToken('dummy-token');
-    userStore.login({ name: name.value, email: email.value, password: '' });
-    router.push('/tabs/tab1');
-  } catch (err: any) {
-    console.error('Registration error', err);
-    errorMessage.value = err?.message || 'Error al registrar la cuenta';
-    setTimeout(() => {
-      saveToken('dummy-token');
-      userStore.login({ name: name.value, email: email.value, password: '' });
-      router.push('/tabs/tab1');
-    }, 2000);
-  } finally {
-    loading.value = false;
-  }
-};
+  // The composable already provides isFormValid, register, etc.
 
 const getLocation = async () => {
   try {
