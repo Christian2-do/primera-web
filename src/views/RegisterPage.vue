@@ -26,13 +26,16 @@
                 <ion-label position="floating" class="label-spacing">Contraseña</ion-label>
                 <ion-input v-model="password" type="password" required class="input-spacing"></ion-input>
               </ion-item>
+              <ion-item>
+                <ion-label position="floating" class="label-spacing">Confirmar Contraseña</ion-label>
+                <ion-input v-model="confirmPassword" type="password" required class="input-spacing"></ion-input>
+              </ion-item>
               <ion-button expand="full" type="submit" :disabled="!isFormValid" class="login-button">
                 Registrarse
               </ion-button>
             </form>
             <p style="text-align:center; margin-top:10px;"><router-link to="/login">¿Ya tienes cuenta? Inicia sesión</router-link></p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-            <p v-if="!isFormValid" class="error-message">Completa todos los campos y verifica que las contraseñas coincidan</p>
             <p v-if="photo" style="margin-top:10px;">
               <img :src="photo" alt="Foto capturada" style="width:100%;"/>
             </p>
@@ -64,11 +67,14 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel
     name,
     email,
     password,
+    confirmPassword,
     errorMessage,
     loading,
-    isFormValid,
     register,
+    isFormValid,
   } = useRegisterForm();
+  // Use confirmPassword from composable; no local ref needed
+  // Use isFormValid from composable
 const location = ref<any | null>(null);
 // Camera preview state
 const showPreview = ref(false);

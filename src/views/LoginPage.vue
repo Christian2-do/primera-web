@@ -6,6 +6,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding login-content">
+      <ion-progress-bar v-if="loading" type="indeterminate"></ion-progress-bar>
       <div class="login-container">
         <ion-card>
           <ion-card-header>
@@ -27,9 +28,7 @@
               </ion-button>
             </form>
             <p style="text-align:center; margin-top:10px;"><router-link to="/register">¿No tienes cuenta? Regístrate</router-link></p>
-            <p style="text-align:center; margin-top:10px;">
-              <button @click="goToRegister" style="background:none;border:none;color:#667eea;cursor:pointer;">Regístrate</button>
-            </p>
+            <!-- Link to register page -->
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
           </ion-card-content>
         </ion-card>
@@ -43,7 +42,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { loginApi, saveToken } from '@/services/auth';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonProgressBar } from '@ionic/vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -54,27 +53,15 @@ const loading = ref(false);
 
 const isFormValid = computed(() => !!username.value && !!password.value && !loading.value);
 
-const login = async () => {
-  errorMessage.value = '';
-  loading.value = true;
-  try {
-    console.log('Attempting login with', { username: username.value });
-    const res = await loginApi(username.value, password.value);
-    if (res && res.token) {
-      saveToken(res.token);
+  const login = async () => {
+    errorMessage.value = '';
+    loading.value = true;
+
       userStore.login({ name: res.user?.name || username.value, email: res.user?.email || null, password: '' });
       console.log('Login successful, redirecting to /tabs/tab1');
       router.push('/tabs/tab1');
-    } else {
-      errorMessage.value = 'Respuesta inválida del servidor';
-    }
-  } catch (err: any) {
-    errorMessage.value = err?.message || 'Error al iniciar sesión';
-  } finally {
-    loading.value = false;
-  }
-};
 
+ }
 const goToRegister = () => {
   console.log('Navigating to register');
   router.push('/register');

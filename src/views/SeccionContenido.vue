@@ -40,32 +40,34 @@ const contentStore = useContentStore();
 const router = useRouter();
 
 
-contentStore.$getContent(contentStore.home.internal_name).then( res => {
-    router.push({ path: '/'+contentStore.home.url });
-});
+if (contentStore.home.value?.internal_name) {
+  contentStore.$getContent(contentStore.home.value.internal_name).then(() => {
+    router.push({ path: '/' + contentStore.home.value.url });
+  });
+}
 
 checkNext()
 
 function checkNext(){
   let i = 0;
   setTimeout(() => {
-    contentStore.menu.map( (item: any) => {
-      item.sub.map( (sub_item: any) => {
-        if(i === 1){
-          contentStore.$setNext(sub_item)
-          i++;
-        }
-        if(sub_item.internal_name === route.params.name){
-          i++;
-        }
+    contentStore.menu.value?.map( (item: any) => {
+        item.sub.map( (sub_item: any) => {
+          if(i === 1){
+            contentStore.$setNext(sub_item)
+            i++;
+          }
+          if(sub_item.internal_name === route.params.name){
+            i++;
+          }
+        })
       })
-    })
   }, 200)
 }
 
 async function setNext(){
 
-  contentStore.menu.map( (item: any) => {
+  contentStore.menu.value?.map( (item: any) => {
     item.sub.map( (sub_item: any) => {
       if(sub_item.id === contentStore.next.id) {
         sub_item.active = 'yes';

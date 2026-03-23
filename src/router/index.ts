@@ -5,15 +5,15 @@ import TabsPage from '../views/TabsPage.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/tab1'
+    redirect: '/tabs/tab1',
   },
   {
     path: '/login',
-    component: () => import('@/views/LoginPage.vue')
+    component: () => import('@/views/LoginPage.vue'),
   },
   {
     path: '/register',
-    component: () => import('@/views/RegisterPage.vue')
+    component: () => import('@/views/RegisterPage.vue'),
   },
   {
     path: '/tabs/',
@@ -21,31 +21,36 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        redirect: '/tabs/tab1'
+        redirect: '/tabs/tab1',
       },
       {
         path: 'tab1',
         component: () => import('@/views/Tab1Page.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
       },
       {
         path: 'tab2',
         component: () => import('@/views/Tab2Page.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
       },
       {
         path: 'tab3',
         component: () => import('@/views/Tab3Page.vue'),
-        meta: { requiresAuth: true }
-      }
-    ]
-  }
-]
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'camara',
+        component: () => import('@/views/Camara.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
 router.beforeEach((to, from, next) => {
   console.log('Navigating to', to.fullPath, 'from', from.fullPath);
@@ -56,4 +61,4 @@ router.beforeEach((to, from, next) => {
   }
 });
 
-export default router
+export default router;

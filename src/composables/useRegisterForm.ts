@@ -13,11 +13,12 @@ export function useRegisterForm() {
   const errorMessage = ref('');
   const loading = ref(false);
 
-  const isFormValid = computed(() => {
+    const isFormValid = computed(() => {
     const n = name.value.trim();
     const e = email.value.trim();
     const p = password.value.trim();
-    return !!n && !!e && !!p && !loading.value;
+    const cp = confirmPassword.value.trim();
+    return !!n && !!e && !!p && !!cp && p === cp && !loading.value;
   });
 
   watchEffect(() => {
@@ -25,6 +26,7 @@ export function useRegisterForm() {
       name: name.value,
       email: email.value,
       passwordLength: (password.value || '').toString().length,
+      confirmPasswordLength: (confirmPassword.value || '').toString().length,
       isFormValid: isFormValid.value,
       loading: loading.value,
     });
@@ -34,6 +36,9 @@ export function useRegisterForm() {
     errorMessage.value = '';
     loading.value = true;
     try {
+      if (password.value !== confirmPassword.value) {
+        throw new Error('Las contraseñas no coinciden');
+      }
       const res = await registerApi(name.value, email.value, password.value);
       if (res && res.token) {
         saveToken(res.token);
@@ -58,7 +63,7 @@ export function useRegisterForm() {
     name,
     email,
     password,
-    // confirmPassword removed
+    confirmPassword,
     errorMessage,
     loading,
     isFormValid,
